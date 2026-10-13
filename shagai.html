@@ -36,7 +36,7 @@ h1{font-family:var(--serif);font-size:clamp(1.7rem,7vw,2.2rem);margin:0;line-hei
 .tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .mat{background:radial-gradient(circle at 50% 40%,var(--felt),var(--felt-2));border-radius:14px;padding:22px 12px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;box-shadow:inset 0 2px 12px rgba(0,0,0,.35)}
 .bone{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
-.bone svg{width:100%;max-width:92px;height:auto;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
+.bone svg{width:100%;max-width:96px;height:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
 .bone b{color:#f6ead2;font-size:.9rem;letter-spacing:.02em}
 .bone.tumble svg{animation:tumble .75s cubic-bezier(.3,.6,.4,1)}
 @keyframes tumble{0%{transform:translateY(0) rotate(0)}35%{transform:translateY(-38px) rotate(var(--r,200deg))}70%{transform:translateY(4px) rotate(calc(var(--r,200deg)*1.6))}100%{transform:none}}
@@ -106,13 +106,23 @@ function todayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMo
 function pick(){let r=Math.random();for(const s of S){if((r-=s.p)<0)return s.k}return "yamaa"}
 const NAME=Object.fromEntries(S.map(s=>[s.k,s.n]));
 
-// bone faces: flat sides (sheep, goat) are wide; narrow sides (horse, camel) are tall
+let UID=0;
+// four faces of a sheep's anklebone: broad sides (хонь = domed back, ямаа = hollow) and narrow edges (морь = flat, тэмээ = humped)
 function boneSVG(k){
-  const B='fill="var(--bone)" stroke="var(--bone-sh)" stroke-width="2"',I='stroke="var(--bone-ink)" fill="none" stroke-linecap="round"';
-  if(k==="khoni")return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M14 22c6-12 20-14 36-12s30 0 36 10c6 10 4 30-4 38-10 10-24 12-34 10s-24 2-32-8c-8-10-8-28-2-38z"/><ellipse cx="50" cy="40" rx="24" ry="14" fill="var(--bone-sh)" opacity=".35"/><path ${I} stroke-width="2.5" d="M30 40q20-10 40 0"/></svg>`;
-  if(k==="yamaa")return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M12 24c4-12 20-16 38-14s32 2 38 12c6 10 2 28-6 36-10 10-26 10-34 8s-26 4-34-6c-8-10-6-26-2-36z"/><path ${I} stroke-width="5" d="M28 34q22 18 44 0"/><path ${I} stroke-width="2" opacity=".6" d="M34 52q16 6 32 0"/></svg>`;
-  if(k==="mori")return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M32 6c10-4 26-2 34 6s6 20 2 30 2 24-6 30-24 6-32-2-6-20-2-30-6-28 4-34z"/><path ${I} stroke-width="3" d="M50 14c-8 10 8 18 0 28s8 18 0 26"/></svg>`;
-  return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M30 8c12-6 28-4 36 4s4 22 2 30 4 22-4 30-26 6-34-2-4-22-2-30-8-26 2-32z"/><path ${I} stroke-width="3" d="M38 50q12-26 24 0"/><circle cx="50" cy="30" r="5" fill="var(--bone-ink)" opacity=".5"/></svg>`;
+  const u="b"+(UID++);
+  const defs=`<defs>
+   <linearGradient id="${u}f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf5e8"/><stop offset=".55" stop-color="#ead9b8"/><stop offset="1" stop-color="#c7aa78"/></linearGradient>
+   <radialGradient id="${u}h" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fffdf6" stop-opacity=".95"/><stop offset="1" stop-color="#fffdf6" stop-opacity="0"/></radialGradient>
+   <radialGradient id="${u}d" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#6e4f26" stop-opacity=".75"/><stop offset=".6" stop-color="#9c7a48" stop-opacity=".35"/><stop offset="1" stop-color="#9c7a48" stop-opacity="0"/></radialGradient>
+  </defs>`;
+  const body=d=>`<ellipse cx="50" cy="93" rx="30" ry="4.5" fill="#000" opacity=".28"/><path d="${d}" fill="url(#${u}f)" stroke="#a88a58" stroke-width="1.2"/>`;
+  const WIDE="M17 36C16 23 29 15 44 17c8 1 12-1 20-2 15-2 25 9 23 23-1 8 2 14 0 24-3 14-16 20-30 18-8-1-12 2-22 2-15 0-23-12-21-25 1-8 4-13 3-21z";
+  let inner;
+  if(k==="khoni") inner=body(WIDE)+`<ellipse cx="44" cy="44" rx="26" ry="18" fill="url(#${u}h)"/><path d="M24 66c16 6 38 6 58-4" fill="none" stroke="#b39466" stroke-width="1.6" stroke-linecap="round" opacity=".7"/><path d="M70 22c8 4 12 12 12 20" fill="none" stroke="#b39466" stroke-width="1.4" stroke-linecap="round" opacity=".6"/>`;
+  else if(k==="yamaa") inner=body(WIDE)+`<ellipse cx="51" cy="51" rx="27" ry="19" fill="url(#${u}d)"/><path d="M49 36c-4 9-3 20 3 30" fill="none" stroke="#f6ecd6" stroke-width="2.2" stroke-linecap="round" opacity=".75"/><path d="M28 34c12-8 32-9 46-2" fill="none" stroke="#fffaf0" stroke-width="2" stroke-linecap="round" opacity=".8"/>`;
+  else if(k==="mori") inner=body("M36 12c10-4 24-2 28 6 4 8 0 16 2 26s4 18 0 30c-4 12-20 16-28 10s-4-18-6-28-4-20-2-30c1-8 2-12 6-14z")+`<path d="M44 26c2 18 0 36 4 52" fill="none" stroke="#fffaf0" stroke-width="5" stroke-linecap="round" opacity=".55"/><ellipse cx="51" cy="20" rx="9" ry="5" fill="url(#${u}h)"/><path d="M58 30c2 14 0 30 2 44" fill="none" stroke="#a88a58" stroke-width="1.4" stroke-linecap="round" opacity=".7"/><ellipse cx="50" cy="80" rx="8" ry="4" fill="url(#${u}d)" opacity=".7"/>`;
+  else inner=body("M38 10c12-4 24 2 24 12 0 8 8 14 8 26s-8 16-6 28c2 10-12 16-22 10s-6-16-8-26-6-18-4-30c1-10 0-16 8-20z")+`<ellipse cx="58" cy="44" rx="10" ry="13" fill="url(#${u}h)"/><ellipse cx="44" cy="68" rx="8" ry="11" fill="url(#${u}d)"/><path d="M40 30c8 6 18 10 26 10" fill="none" stroke="#a88a58" stroke-width="1.4" stroke-linecap="round" opacity=".75"/><ellipse cx="46" cy="18" rx="6" ry="4" fill="url(#${u}h)"/>`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">${defs}${inner}</svg>`;
 }
 const mat=$("mat");
 function paint(res,anim){
