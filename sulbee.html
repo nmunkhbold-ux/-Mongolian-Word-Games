@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="16 үгийг нийтлэг шинжээр нь 4 бүлэгт хуваа.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Үгийн сүлбээ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Golos+Text:wght@400;600;700&display=swap">
+<style>
+/* Layout: newspaper puzzle column — masthead, 4×4 word grid, mistake dots, three actions. Four group colors map to difficulty. */
+:root{
+  --bg:#f4f5f7; --fg:#16181d; --muted:#5f6572; --line:#d3d7de;
+  --tile:#e3e1da; --tile-sel:#3d4250; --on-sel:#ffffff; --panel:#ffffff;
+  --g1:#efc94c; --g2:#a5c96a; --g3:#97b9ea; --g4:#bd96d9; --on-g:#16181d;
+  --serif:"PT Serif",Georgia,"Times New Roman",serif;
+  --body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121418; --fg:#ecedf0; --muted:#9aa0ad; --line:#2f333c;
+  --tile:#2b2e35; --tile-sel:#d9dbe1; --on-sel:#121418; --panel:#1b1e24;
+  --g1:#d9b23a; --g2:#8db356; --g3:#7ea3d8; --g4:#a982c6; --on-g:#121418; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121418; --fg:#ecedf0; --muted:#9aa0ad; --line:#2f333c;
+  --tile:#2b2e35; --tile-sel:#d9dbe1; --on-sel:#121418; --panel:#1b1e24;
+  --g1:#d9b23a; --g2:#8db356; --g3:#7ea3d8; --g4:#a982c6; --on-g:#121418; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px}
+.app{max-width:560px;margin:0 auto;padding:0 16px 28px;box-sizing:border-box}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:14px 10px;border-bottom:3px double var(--fg)}
+h1{font-family:var(--serif);font-size:clamp(1.6rem,6vw,2.1rem);margin:0;line-height:1;letter-spacing:-.01em}
+.dateline{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.ib{background:none;border:1px solid var(--line);color:var(--fg);font:600 .8rem var(--body);padding:7px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.ib:hover,.ib:focus-visible{border-color:var(--fg);outline:none}
+.mode{display:flex;justify-content:center;gap:6px;padding-block:14px 4px}
+.mode button{border:1px solid var(--line);background:none;color:var(--muted);font:600 .82rem var(--body);padding:7px 14px;border-radius:999px;cursor:pointer}
+.mode button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.lede{text-align:center;color:var(--muted);margin:10px 0 14px;font-size:.92rem}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.solved{grid-column:1/-1;border-radius:8px;padding:14px 10px;text-align:center;color:var(--on-g);animation:rise .35s ease}
+.solved h3{margin:0 0 4px;font:700 .95rem var(--body);text-transform:uppercase;letter-spacing:.04em}
+.solved p{margin:0;font-size:.88rem}
+.l1{background:var(--g1)}.l2{background:var(--g2)}.l3{background:var(--g3)}.l4{background:var(--g4)}
+.tile{aspect-ratio:1/0.82;border:0;border-radius:8px;background:var(--tile);color:var(--fg);font:700 clamp(.78rem,3.4vw,1rem) var(--body);text-transform:uppercase;cursor:pointer;padding:4px;line-height:1.15;overflow-wrap:anywhere;hyphens:auto;transition:transform .12s,background .15s;min-width:0}
+.tile.sm{font-size:clamp(.62rem,2.7vw,.84rem)}
+.tile:active{transform:scale(.96)}
+.tile:focus-visible{outline:3px solid var(--g3);outline-offset:2px}
+.tile[aria-pressed="true"]{background:var(--tile-sel);color:var(--on-sel)}
+.tile.shake{animation:shake .4s}
+.tile.hop{animation:hop .35s}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes hop{50%{transform:translateY(-8px)}}
+@keyframes rise{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.mist{display:flex;align-items:center;justify-content:center;gap:8px;margin:18px 0 14px;color:var(--muted);font-size:.9rem}
+.dots{display:flex;gap:7px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--tile-sel);display:block;transition:opacity .3s}
+.dots i.gone{opacity:.15}
+.acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.btn{border:1px solid var(--fg);background:none;color:var(--fg);font:600 .9rem var(--body);padding:11px 18px;border-radius:999px;cursor:pointer}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.pri{background:var(--fg);color:var(--bg)}
+.btn:focus-visible{outline:3px solid var(--g3);outline-offset:2px}
+.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 80px);left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;z-index:20;pointer-events:none}
+.end{margin-top:18px;text-align:center;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.end h2{font-family:var(--serif);margin:0 0 6px;font-size:1.4rem}
+.end pre{font-size:1.3rem;line-height:1.25;margin:10px 0;font-family:inherit}
+.end .acts{margin-top:10px}
+.modal{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 75%,transparent);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px;max-width:420px;width:100%;max-height:90%;overflow:auto;box-sizing:border-box;position:relative}
+.card h2{font-family:var(--serif);margin:0 0 10px;font-size:1.3rem}
+.card p,.card li{line-height:1.5}
+.card ul{padding-left:18px;margin:8px 0}
+.close{position:absolute;top:12px;right:12px}
+.legend{display:grid;gap:6px;margin-top:12px}
+.legend div{border-radius:6px;padding:7px 10px;color:var(--on-g);font-size:.85rem;font-weight:600}
+.count{font-size:.8rem;color:var(--muted);text-align:center;margin-top:16px;font-variant-numeric:tabular-nums}
+</style>
+
+<div class="app">
+  <header>
+    <div>
+      <h1>Үгийн сүлбээ</h1>
+      <div class="dateline" id="dateline"></div>
+    </div>
+    <button class="ib" id="helpBtn">Заавар</button>
+  </header>
+  <div class="mode">
+    <button id="mDaily" aria-pressed="true">Өдрийн тоглоом</button>
+    <button id="mFree" aria-pressed="false">Хязгааргүй</button>
+  </div>
+  <p class="lede">Нийтлэг холбоотой дөрвөн үгээр дөрвөн бүлэг үүсгэ!</p>
+  <div class="grid" id="grid"></div>
+  <div class="mist" id="mistWrap">Алдааны эрх: <span class="dots" id="dots"></span></div>
+  <div class="acts" id="acts">
+    <button class="btn" id="shuffle">Холих</button>
+    <button class="btn" id="clear">Цуцлах</button>
+    <button class="btn pri" id="submit" disabled>Илгээх</button>
+  </div>
+  <div class="end" id="end" hidden></div>
+  <div class="count" id="count"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<div class="modal" id="help" hidden><div class="card">
+  <button class="ib close" data-close>✕</button>
+  <h2>Тоглох заавар</h2>
+  <p>16 үгээс нийтлэг шинжтэй <b>дөрвөн үгийг</b> сонгож «Илгээх» товчийг дар.</p>
+  <ul>
+    <li>Нийт 4 бүлэг байна. Бүлэг бүрт яг 4 үг.</li>
+    <li>4 удаа алдах эрхтэй.</li>
+    <li>Зарим үг хоёр бүлэгт тохирох мэт харагдана. Болгоомжтой!</li>
+  </ul>
+  <p><b>Жишээ:</b> ДАВАА, МЯГМАР, ПҮРЭВ, БЯМБА → <i>Гарагийн нэр</i><br>ХУУР, ЦЭРЭГ, ТЭРЭГ, ШОРГООЛЖ → <i>Морин ___</i></p>
+  <p>Бүлгийн өнгө нь хүндийн зэргийг заана:</p>
+  <div class="legend">
+    <div class="l1">Шар · Хялбар</div><div class="l2">Ногоон · Дунд</div>
+    <div class="l3">Хөх · Хүнд</div><div class="l4">Ягаан · Овсгоо шаардана</div>
+  </div>
+  <p style="color:var(--muted);font-size:.88rem">«Өдрийн тоглоом» өдөр бүр шинэчлэгдэнэ. «Хязгааргүй» горимд хүссэн хэмжээгээрээ шинэ тоглоом үүсгэнэ.</p>
+</div></div>
+
+<script>
+// level 1 easy → 4 tricky. `x` = extra words that also fit the category (used only to block ambiguous puzzles)
+const CATS=[
+ [1,"Таван хошуу мал",["Морь","Үхэр","Тэмээ","Хонь","Ямаа"]],
+ [1,"Өнгө",["Улаан","Ногоон","Шар","Хөх","Ягаан","Бор","Цагаан","Хар"]],
+ [1,"Гэр бүлийн гишүүд",["Ээж","Аав","Ах","Эгч","Дүү","Эмээ","Өвөө"]],
+ [1,"Улирал",["Хавар","Зун","Намар","Өвөл"]],
+ [1,"Хүнсний ногоо",["Төмс","Лууван","Байцаа","Сонгино","Сармис","Манжин"]],
+ [1,"Жимс",["Алим","Гадил","Жүрж","Усан үзэм","Тарвас","Лийр","Нимбэг"]],
+ [1,"Нүүрний хэсэг",["Нүд","Чих","Хамар","Ам","Хөмсөг","Хацар"]],
+ [1,"Тавилга",["Ширээ","Сандал","Ор","Шүүгээ","Буйдан"]],
+ [1,"Тээврийн хэрэгсэл",["Машин","Онгоц","Галт тэрэг","Автобус","Трамвай","Унадаг дугуй"]],
+ [1,"Цаг агаар",["Бороо","Цас","Салхи","Манан","Мөндөр","Шуурга"]],
+ [1,"Бичгийн хэрэгсэл",["Үзэг","Харандаа","Баллуур","Дэвтэр","Шугам"]],
+ [1,"Гал тогооны хэрэгсэл",["Тогоо","Халбага","Сэрээ","Хутга","Аяга","Таваг"]],
+ [1,"Тоо",["Нэг","Хоёр","Гурав","Дөрөв","Зургаа","Долоо","Найм"]],
+ [2,"Монгол хоол",["Бууз","Хуушуур","Банш","Цуйван","Хорхог","Бантан","Боодог"],["Будаа"]],
+ [2,"Цагаан идээ",["Аарц","Ааруул","Өрөм","Тараг","Шар тос","Бяслаг","Айраг"],["Идээ"]],
+ [2,"Гэрийн хэсэг",["Тооно","Хана","Унь","Хаалга","Багана","Туурга"]],
+ [2,"Хөгжмийн зэмсэг",["Морин хуур","Ятга","Шанз","Лимбэ","Ёочин","Хуучир","Бишгүүр"],["Хуур"]],
+ [2,"Аймаг",["Архангай","Дорнод","Хэнтий","Сэлэнгэ","Увс","Ховд","Завхан","Хөвсгөл","Дундговь"],["Төв"]],
+ [2,"Гариг",["Буд","Сугар","Ангараг","Бархасбадь","Санчир"]],
+ [2,"Гарагийн нэр",["Даваа","Мягмар","Лхагва","Пүрэв","Баасан","Бямба","Ням"]],
+ [2,"Зэрлэг амьтан",["Чоно","Үнэг","Баавгай","Ирвэс","Тарвага","Хярс","Буга"],["Хэрэм","Туулай","Загас","Арслан","Бар","Мич","Могой","Хулгана"]],
+ [2,"Мэргэжил",["Эмч","Багш","Жолооч","Тогооч","Малчин","Инженер","Нисгэгч"]],
+ [2,"Морины хэрэглэл",["Эмээл","Жолоо","Хазаар","Дөрөө","Ташуур","Чөдөр","Уурга"]],
+ [2,"Спорт",["Хөлбөмбөг","Сагсан бөмбөг","Жүдо","Теннис","Сэлэлт","Бокс"],["Бөх","Шатар"]],
+ [2,"Улсын нийслэл",["Токио","Сөүл","Бээжин","Москва","Парис","Берлин","Лондон"]],
+ [3,"Шатрын хүү",["Ноён","Бэрс","Тэмээ","Морь","Тэрэг","Хүү"]],
+ [3,"Арван хоёр жил",["Хулгана","Үхэр","Бар","Туулай","Луу","Могой","Морь","Хонь","Мич","Тахиа","Нохой","Гахай"]],
+ [3,"Их Монгол Улсын хаад",["Чингис","Өгөдэй","Гүюг","Мөнх","Хубилай"]],
+ [3,"Гол мөрөн",["Орхон","Сэлэнгэ","Туул","Хэрлэн","Онон","Завхан"]],
+ [3,"Нуур",["Хөвсгөл","Увс","Буйр","Хяргас","Ачит","Хар-Ус"]],
+ [3,"Бөхийн цол",["Начин","Заан","Харцага","Арслан","Аварга","Гарьд"]],
+ [3,"Тэнгэрийн биет",["Нар","Сар","Од","Сүүлт од","Солир"]],
+ [3,"Монгол зохиолч",["Нацагдорж","Лодойдамба","Равжаа","Явуухулан","Ринчен","Дашдооров"]],
+ [3,"Шагайн тал",["Морь","Тэмээ","Хонь","Ямаа"]],
+ [4,"Морин ___",["Хуур","Цэрэг","Тэрэг","Шоргоолж","Уралдаан"]],
+ [4,"Цагаан ___",["Сар","Идээ","Хэрэм","Будаа","Толгой"]],
+ [4,"Хар ___",["Салхи","Ус","Зах","Тугалга"]],
+ [4,"Алтан ___",["Гадас","Загас","Ордон","Товч"]],
+ [4,"Их ___",["Сургууль","Хурал","Засаг","Дэлгүүр"]],
+].map(([l,n,w,x])=>({l,n,w,all:new Set([...w,...(x||[])].map(s=>s.toLowerCase()))}));
+
+const $=id=>document.getElementById(id);
+function rng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function shuf(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function todayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function dayNum(){const d=new Date(),s=new Date(2026,0,1);return Math.floor((new Date(d.getFullYear(),d.getMonth(),d.getDate())-s)/864e5)+1}
+function load(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+// one category per level; every shown word must fit exactly one chosen category
+function makePuzzle(r){
+  for(let t=0;t<500;t++){
+    const picks=[1,2,3,4].map(l=>shuf(CATS.filter(c=>c.l===l),r)[0]);
+    const groups=picks.map(c=>({l:c.l,n:c.n,w:shuf(c.w,r).slice(0,4)}));
+    const words=groups.flatMap(g=>g.w);
+    if(new Set(words.map(w=>w.toLowerCase())).size!==16)continue;
+    if(words.every(w=>picks.filter(c=>c.all.has(w.toLowerCase())).length===1))return groups;
+  }
+}
+
+let mode="daily",groups,order,sel=[],solved=[],mistakes=0,history=[],done=false,busy=false,freeCount=load("sulbee-free",0);
+
+function start(m){
+  mode=m;$("mDaily").setAttribute("aria-pressed",m==="daily");$("mFree").setAttribute("aria-pressed",m==="free");
+  const r=m==="daily"?rng(dayNum()*7919+17):rng((Math.random()*4294967296)>>>0);
+  groups=makePuzzle(r);order=shuf(groups.flatMap(g=>g.w),r);
+  sel=[];solved=[];mistakes=0;history=[];done=false;
+  $("dateline").textContent=m==="daily"?`№${dayNum()} · ${todayKey()}`:"Хязгааргүй горим";
+  if(m==="daily"){const s=load("sulbee-daily",null);
+    if(s&&s.date===todayKey()){history=s.history;mistakes=s.mistakes;solved=s.solved;done=s.done;order=order.filter(w=>!solved.some(i=>groups[i].w.includes(w)))}}
+  render();
+}
+function persist(){if(mode==="daily")save("sulbee-daily",{date:todayKey(),history,mistakes,solved,done})}
+
+function render(){
+  const g=$("grid");g.innerHTML="";
+  solved.forEach(i=>{const d=document.createElement("div");d.className="solved l"+groups[i].l;d.innerHTML=`<h3>${groups[i].n}</h3><p>${groups[i].w.join(", ").toUpperCase()}</p>`;g.appendChild(d)});
+  order.forEach(w=>{const b=document.createElement("button");b.className="tile"+(w.length>8||w.includes(" ")?" sm":"");b.textContent=w;b.type="button";
+    b.setAttribute("aria-pressed",sel.includes(w));b.disabled=done;b.onclick=()=>toggle(w);g.appendChild(b)});
+  $("dots").innerHTML=[0,1,2,3].map(i=>`<i class="${i<mistakes?"gone":""}"></i>`).join("");
+  $("submit").disabled=sel.length!==4||done;$("clear").disabled=!sel.length||done;$("shuffle").disabled=done;
+  $("acts").hidden=done;$("mistWrap").hidden=done;
+  $("count").textContent=mode==="free"?`Хязгааргүй горимд шийдсэн: ${freeCount}`:"";
+  renderEnd();
+}
+function toggle(w){if(busy||done)return;if(sel.includes(w))sel=sel.filter(x=>x!==w);else if(sel.length<4)sel.push(w);render()}
+function toast(m,ms=1600){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,ms)}
+const tilesFor=ws=>[...document.querySelectorAll(".tile")].filter(b=>ws.includes(b.textContent));
+
+function submit(){
+  if(sel.length!==4||busy)return;
+  const key=sel.slice().sort().join("|");
+  if(history.some(h=>h.slice().sort().join("|")===key)){toast("Энэ хослолыг аль хэдийн оролдсон");return}
+  history.push(sel.slice());busy=true;
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  tilesFor(sel).forEach((b,i)=>setTimeout(()=>b.classList.add("hop"),reduce?0:i*90));
+  setTimeout(()=>{
+    busy=false;
+    const hit=groups.findIndex((g,i)=>!solved.includes(i)&&sel.every(w=>g.w.includes(w)));
+    if(hit>=0){solved.push(hit);order=order.filter(w=>!sel.includes(w));sel=[];
+      if(solved.length===4)finish(true);}
+    else{
+      const near=groups.some((g,i)=>!solved.includes(i)&&sel.filter(w=>g.w.includes(w)).length===3);
+      mistakes++;toast(near?"Нэг л дутуу!":"Буруу байна");
+      tilesFor(sel).forEach(b=>{b.classList.remove("hop");b.classList.add("shake")});
+      if(mistakes>=4){setTimeout(()=>finish(false),500);persist();return}
+      setTimeout(render,450);persist();return;
+    }
+    persist();render();
+  },reduce?50:500);
+}
+function finish(win){
+  done=true;
+  if(!win){[0,1,2,3].filter(i=>!solved.includes(i)).sort((a,b)=>groups[a].l-groups[b].l).forEach(i=>solved.push(i));order=[];}
+  if(mode==="free"&&win){freeCount++;save("sulbee-free",freeCount)}
+  sel=[];persist();render();
+}
+function shareText(){
+  const em={1:"🟨",2:"🟩",3:"🟦",4:"🟪"},lvl=w=>groups.find(g=>g.w.includes(w)).l;
+  return `Үгийн сүлбээ ${mode==="daily"?"№"+dayNum():""}\n`+history.map(h=>h.map(w=>em[lvl(w)]).join("")).join("\n");
+}
+function renderEnd(){
+  const e=$("end");if(!done){e.hidden=true;return}
+  const win=history.length&&mistakes<4;
+  e.hidden=false;
+  e.innerHTML=`<h2>${win?(mistakes===0?"Төгс шийдлээ!":"Баяр хүргэе!"):"Дараагийн удаа амжилт!"}</h2>
+   <div style="color:var(--muted)">${win?`${mistakes} алдаатай шийдлээ.`:"Хариултууд дээр харагдаж байна."}</div>
+   <pre>${shareText().split("\n").slice(1).join("\n")}</pre>
+   <div class="acts"><button class="btn" id="shareBtn">Хуваалцах</button><button class="btn pri" id="newBtn">${mode==="free"?"Шинэ тоглоом":"Хязгааргүй тоглох"}</button></div>`;
+  $("shareBtn").onclick=()=>{const t=shareText();navigator.clipboard?navigator.clipboard.writeText(t).then(()=>toast("Хуулагдлаа")).catch(()=>toast("Хуулж чадсангүй")):toast("Хуулж чадсангүй")};
+  $("newBtn").onclick=()=>start("free");
+}
+$("shuffle").onclick=()=>{order=shuf(order,Math.random);render()};
+$("clear").onclick=()=>{sel=[];render()};
+$("submit").onclick=submit;
+$("mDaily").onclick=()=>{if(mode!=="daily")start("daily")};
+$("mFree").onclick=()=>start("free");
+$("helpBtn").onclick=()=>$("help").hidden=false;
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m||e.target.closest("[data-close]"))m.hidden=true}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("help").hidden=true;if(e.key==="Enter"&&$("help").hidden&&!document.activeElement?.classList.contains("tile")&&!$("submit").disabled){e.preventDefault();submit()}});
+start("daily");
+</script>
+
+<p style="text-align:center;font:13px system-ui;margin:8px 0 20px"><a href="index.html" style="color:inherit">← Бүх тоглоом</a></p>
+</body>
+</html>
