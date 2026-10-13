@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Дөрвөн шагай шидэж өдрийн мэргээ үз, эсвэл шагайн морь уралдуул.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Шагай</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@700&family=Golos+Text:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column — masthead, two tabs, a felt mat where four bones land, then the reading or the race track. */
+:root{
+  --bg:#f5f2f0; --fg:#1d1716; --muted:#6c5f5b; --line:#ddd3cf; --panel:#ffffff;
+  --felt:#7a1f22; --felt-2:#5e1619; --bone:#efe4cf; --bone-sh:#c9b48f; --bone-ink:#6b4f2a;
+  --accent:#c8902a; --p1:#1d64c8; --p2:#c8902a;
+  --serif:"PT Serif",Georgia,serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141011; --fg:#efe8e4; --muted:#a8999a; --line:#352a2a; --panel:#1e1819;
+  --felt:#6a1a1d; --felt-2:#4a1214; --bone:#e8dcc4; --bone-sh:#b9a37d; --bone-ink:#5e4524;
+  --accent:#dba23a; --p1:#4a8ce8; --p2:#dba23a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141011; --fg:#efe8e4; --muted:#a8999a; --line:#352a2a; --panel:#1e1819;
+  --felt:#6a1a1d; --felt-2:#4a1214; --bone:#e8dcc4; --bone-sh:#b9a37d; --bone-ink:#5e4524;
+  --accent:#dba23a; --p1:#4a8ce8; --p2:#dba23a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px}
+.app{max-width:560px;margin:0 auto;padding:0 16px 28px;box-sizing:border-box}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:14px 10px;border-bottom:3px double var(--fg)}
+h1{font-family:var(--serif);font-size:clamp(1.7rem,7vw,2.2rem);margin:0;line-height:1}
+.sub{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.tabs{display:flex;justify-content:center;gap:6px;padding-block:14px 12px}
+.tabs button{border:1px solid var(--line);background:none;color:var(--muted);font:600 .85rem var(--body);padding:8px 16px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.mat{background:radial-gradient(circle at 50% 40%,var(--felt),var(--felt-2));border-radius:14px;padding:22px 12px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;box-shadow:inset 0 2px 12px rgba(0,0,0,.35)}
+.bone{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.bone svg{width:100%;max-width:92px;height:auto;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
+.bone b{color:#f6ead2;font-size:.9rem;letter-spacing:.02em}
+.bone.tumble svg{animation:tumble .75s cubic-bezier(.3,.6,.4,1)}
+@keyframes tumble{0%{transform:translateY(0) rotate(0)}35%{transform:translateY(-38px) rotate(var(--r,200deg))}70%{transform:translateY(4px) rotate(calc(var(--r,200deg)*1.6))}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.bone.tumble svg{animation:none}}
+.btn{border:0;border-radius:999px;padding:13px 22px;font:700 1rem var(--body);cursor:pointer;background:var(--accent);color:#1d1716}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.alt{background:none;border:1px solid var(--line);color:var(--fg);font-weight:600;font-size:.88rem;padding:10px 16px}
+.btn:focus-visible{outline:3px solid var(--p1);outline-offset:2px}
+.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.reading{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.reading .tag{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.reading h2{font-family:var(--serif);font-size:1.45rem;margin:4px 0 8px;text-wrap:balance}
+.reading p{margin:0;line-height:1.55;max-width:60ch}
+.tally{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tally span{font-size:.8rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.note{font-size:.8rem;color:var(--muted);margin-top:14px;line-height:1.5}
+.track{margin-top:18px;display:grid;gap:10px}
+.lane{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.lane .who{display:flex;justify-content:space-between;font-weight:600;font-size:.9rem;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.lane.turn{border-color:var(--fg)}
+.cells{display:grid;grid-template-columns:repeat(16,1fr);gap:2px}
+.cells i{height:22px;border-radius:3px;background:var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.75rem;min-width:0}
+.cells i.goal{background:var(--accent)}
+.lane.p1 .cells i.on{background:var(--p1)} .lane.p2 .cells i.on{background:var(--p2)}
+.cells i.here::after{content:"🐎";font-size:.85rem}
+.rules{font-size:.86rem;color:var(--muted);line-height:1.5;margin-top:4px;text-align:center}
+.log{text-align:center;font-weight:600;margin-top:12px;min-height:1.5em}
+.opp{display:flex;justify-content:center;gap:6px;margin-top:4px}
+.opp button{border:1px solid var(--line);background:none;color:var(--muted);font:600 .8rem var(--body);padding:6px 12px;border-radius:999px;cursor:pointer}
+.opp button[aria-pressed="true"]{border-color:var(--fg);color:var(--fg)}
+</style>
+
+<div class="app">
+  <header>
+    <div><h1>Шагай</h1><div class="sub" id="sub"></div></div>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tFort" aria-selected="true">Өдрийн мэрэг</button>
+    <button role="tab" id="tRace" aria-selected="false">Морь уралдаан</button>
+  </div>
+
+  <div class="mat" id="mat"></div>
+
+  <section id="fort">
+    <div class="row"><button class="btn" id="tossF">Шагай шидэх</button></div>
+    <div class="reading" id="reading"></div>
+    <p class="note">Хонь, ямаа тал илүү олон буудаг бол морь, тэмээ ховор буудаг. Энэ тоглоом бодит шагайн магадлалтай ойролцоо. Мэргэ нь зөвхөн зугаа цэнгэлийн зорилготой.</p>
+  </section>
+
+  <section id="race" hidden>
+    <div class="opp"><button id="vsCpu" aria-pressed="true">Компьютертэй</button><button id="vs2" aria-pressed="false">Хоёулаа</button></div>
+    <p class="rules">Морь буувал <b>2</b>, тэмээ буувал <b>1</b> алхана. Дөрвүүлаа ижил буувал дахин шиднэ. 15-р нүдэнд түрүүлж хүрсэн нь ялна!</p>
+    <div class="track" id="track"></div>
+    <div class="log" id="log"></div>
+    <div class="row"><button class="btn" id="tossR">Шидэх</button><button class="btn alt" id="resetR">Шинээр эхлэх</button></div>
+  </section>
+</div>
+
+<script>
+// approximate real-world landing odds: the flat sides come up far more often
+const S=[
+  {k:"mori",n:"Морь",p:.12},{k:"temee",n:"Тэмээ",p:.12},{k:"khoni",n:"Хонь",p:.38},{k:"yamaa",n:"Ямаа",p:.38}
+];
+const $=id=>document.getElementById(id);
+function load(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function todayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function pick(){let r=Math.random();for(const s of S){if((r-=s.p)<0)return s.k}return "yamaa"}
+const NAME=Object.fromEntries(S.map(s=>[s.k,s.n]));
+
+// bone faces: flat sides (sheep, goat) are wide; narrow sides (horse, camel) are tall
+function boneSVG(k){
+  const B='fill="var(--bone)" stroke="var(--bone-sh)" stroke-width="2"',I='stroke="var(--bone-ink)" fill="none" stroke-linecap="round"';
+  if(k==="khoni")return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M14 22c6-12 20-14 36-12s30 0 36 10c6 10 4 30-4 38-10 10-24 12-34 10s-24 2-32-8c-8-10-8-28-2-38z"/><ellipse cx="50" cy="40" rx="24" ry="14" fill="var(--bone-sh)" opacity=".35"/><path ${I} stroke-width="2.5" d="M30 40q20-10 40 0"/></svg>`;
+  if(k==="yamaa")return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M12 24c4-12 20-16 38-14s32 2 38 12c6 10 2 28-6 36-10 10-26 10-34 8s-26 4-34-6c-8-10-6-26-2-36z"/><path ${I} stroke-width="5" d="M28 34q22 18 44 0"/><path ${I} stroke-width="2" opacity=".6" d="M34 52q16 6 32 0"/></svg>`;
+  if(k==="mori")return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M32 6c10-4 26-2 34 6s6 20 2 30 2 24-6 30-24 6-32-2-6-20-2-30-6-28 4-34z"/><path ${I} stroke-width="3" d="M50 14c-8 10 8 18 0 28s8 18 0 26"/></svg>`;
+  return `<svg viewBox="0 0 100 80" aria-hidden="true"><path ${B} d="M30 8c12-6 28-4 36 4s4 22 2 30 4 22-4 30-26 6-34-2-4-22-2-30-8-26 2-32z"/><path ${I} stroke-width="3" d="M38 50q12-26 24 0"/><circle cx="50" cy="30" r="5" fill="var(--bone-ink)" opacity=".5"/></svg>`;
+}
+const mat=$("mat");
+function paint(res,anim){
+  mat.innerHTML=res.map(k=>`<div class="bone${anim?" tumble":""}" style="--r:${(Math.random()>.5?1:-1)*(160+Math.random()*200)}deg">${boneSVG(k)}<b>${NAME[k]}</b></div>`).join("");
+}
+const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+function toss(cb){
+  const res=[pick(),pick(),pick(),pick()];
+  if(reduce()){paint(res,false);cb(res);return}
+  let n=0;const spin=setInterval(()=>{paint([0,0,0,0].map(()=>S[Math.floor(Math.random()*4)].k),n===0);n++},110);
+  setTimeout(()=>{clearInterval(spin);paint(res,false);cb(res)},700);
+}
+const count=res=>res.reduce((o,k)=>(o[k]=(o[k]||0)+1,o),{});
+
+// ---------- fortune ----------
+function read(res){
+  const c=count(res),m=c.mori||0,t=c.temee||0,kinds=Object.keys(c).length;
+  if(m===4)return["Дөрвөн морь","Ховорхон аз! Хийморь чинь сэргэж, санасан бүхэн тань бүтэх өдөр. Шинэ ажлаа эхлүүлэх, том шийдвэр гаргахад тохиромжтой."];
+  if(t===4)return["Дөрвөн тэмээ","Тэвчээр, тэсвэр хатуужлын өдөр. Удаан ч гэсэн тогтвортой алхам чинь холын замыг туулна."];
+  if(c.khoni===4)return["Дөрвөн хонь","Амар тайван, эв найрамдлын өдөр. Гэр бүл, ойр дотныхонтойгоо цагийг сайхан өнгөрүүлээрэй."];
+  if(c.yamaa===4)return["Дөрвөн ямаа","Сэргэлэн, авхаалжтай байх өдөр. Санаачилга гаргавал бусдаас түрүүлнэ."];
+  if(kinds===4)return["Дөрвөн өөр","Таван хошуу малын дөрвөн нь бүрдсэн шиг бүх зүйл цогцоороо. Олон талын ажил зэрэг бүтэмжтэй явна."];
+  if(m===3)return["Гурван морь","Аз тань хөөрч байна. Зориг гаргаад урагшаа алхаарай, ойрын хүсэл биелэх дөхсөн."];
+  if(t===3)return["Гурван тэмээ","Хол замын мэдээ, алсын хүсэл. Төлөвлөгөөгөө нарийн гаргавал үр дүнгээ өгнө."];
+  if(m===2)return["Хоёр морь","Сайн нөхөр, сайхан уулзалт хүлээж байна. Хамтран хийх ажил бүтэмжтэй."];
+  if(m===1&&t>=1)return["Морь, тэмээ","Хурд ба тэсвэр хоёр нийлжээ. Эхлүүлсэн ажлаа дуусгах хүч чамд бий."];
+  if(m===1)return["Ганц морь","Жижиг ч гэсэн аз дагана. Өнөөдрийн нэг сайн үйл маргаашийн том баярын эх болно."];
+  if(t>=1)return["Тэмээтэй","Тайван, хэмжээтэй байх нь зөв. Яаралгүй шийдвэр гаргаарай."];
+  if((c.khoni||0)===3)return["Гурван хонь","Энгийн баяр баясгалан, тав тухтай өдөр. Бусдад туслах нь өөрт тань буянтай."];
+  if((c.yamaa||0)===3)return["Гурван ямаа","Шинэ санаа, шинэ таниал. Сониуч зангаа дагаарай."];
+  return["Хонь, ямаа","Жирийн тогтуун өдөр. Хүлээлтгүй ч болгоомжгүй бус, өдөр тутмын ажлаа сайн хийхэд тохиромжтой."];
+}
+function showReading(res,saved){
+  const [h,p]=read(res),c=count(res);
+  $("reading").innerHTML=`<div class="tag">${saved?"Өнөөдрийн мэрэг · "+todayKey():"Дахин шидсэн"}</div><h2>${h}</h2><p>${p}</p>
+   <div class="tally">${S.map(s=>`<span>${s.n} ${c[s.k]||0}</span>`).join("")}</div>`;
+}
+$("tossF").onclick=()=>{
+  const b=$("tossF");b.disabled=true;
+  toss(res=>{
+    const d=load("shagai-daily",null),first=!d||d.date!==todayKey();
+    if(first)save("shagai-daily",{date:todayKey(),res});
+    showReading(res,first);b.disabled=false;b.textContent="Дахин шидэх";
+  });
+};
+function initFortune(){
+  const d=load("shagai-daily",null);
+  if(d&&d.date===todayKey()){paint(d.res,false);showReading(d.res,true);$("tossF").textContent="Дахин шидэх"}
+  else{paint(["khoni","mori","yamaa","temee"],false);
+    $("reading").innerHTML=`<div class="tag">Өнөөдрийн мэрэг</div><h2>Шагайгаа шидээрэй</h2><p>Өдрийн анхны шидэлт тань өнөөдрийн мэрэг болж хадгалагдана. Дараа нь хэдэн ч удаа шидэж болно.</p>`}
+}
+
+// ---------- race ----------
+const GOAL=15;let race,vsCpu=true,busy=false;
+function newRace(){race={pos:[0,0],turn:0,done:false};$("log").textContent="";renderTrack();updateBtn()}
+function names(){return vsCpu?["Та","Компьютер"]:["1-р тоглогч","2-р тоглогч"]}
+function renderTrack(){
+  const nm=names();
+  $("track").innerHTML=[0,1].map(i=>`<div class="lane p${i+1}${race.turn===i&&!race.done?" turn":""}"><div class="who"><span>${nm[i]}</span><span>${race.pos[i]} / ${GOAL}</span></div>
+   <div class="cells">${Array.from({length:GOAL+1},(_,c)=>`<i class="${c===GOAL?"goal ":""}${c&&c<=race.pos[i]?"on ":""}${c===race.pos[i]?"here":""}">${c===GOAL&&race.pos[i]!==GOAL?"🏁":""}</i>`).join("")}</div></div>`).join("");
+}
+function updateBtn(){const b=$("tossR"),nm=names();b.disabled=busy||race.done||(vsCpu&&race.turn===1);b.textContent=race.done?"Тоглолт дууслаа":(vsCpu&&race.turn===1?"Компьютер шидэж байна…":nm[race.turn]+" шидэх")}
+function raceToss(){
+  if(busy||race.done)return;busy=true;updateBtn();
+  toss(res=>{
+    const c=count(res),step=(c.mori||0)*2+(c.temee||0),again=Object.keys(c).length===1,p=race.turn,nm=names();
+    race.pos[p]=Math.min(GOAL,race.pos[p]+step);
+    let msg=step?`${nm[p]}: +${step} алхам`:`${nm[p]}: морь, тэмээ буусангүй`;
+    if(race.pos[p]>=GOAL){race.done=true;msg=vsCpu?(p===0?"🏆 Та түрүүллээ!":"Компьютер түрүүллээ. Дахин оролдоорой!"):`🏆 ${nm[p]} түрүүллээ!`}
+    else if(again)msg+=" · Дөрвүүлаа ижил, дахин шиднэ!";
+    else race.turn=1-p;
+    $("log").textContent=msg;busy=false;renderTrack();updateBtn();
+    if(vsCpu&&race.turn===1&&!race.done)setTimeout(raceToss,900);
+  });
+}
+$("tossR").onclick=raceToss;$("resetR").onclick=newRace;
+$("vsCpu").onclick=()=>{vsCpu=true;$("vsCpu").setAttribute("aria-pressed",true);$("vs2").setAttribute("aria-pressed",false);newRace()};
+$("vs2").onclick=()=>{vsCpu=false;$("vs2").setAttribute("aria-pressed",true);$("vsCpu").setAttribute("aria-pressed",false);newRace()};
+
+// ---------- tabs ----------
+function tab(which){
+  const f=which==="fort";$("tFort").setAttribute("aria-selected",f);$("tRace").setAttribute("aria-selected",!f);
+  $("fort").hidden=!f;$("race").hidden=f;
+  $("sub").textContent=f?"Өдрийн мэрэг · "+todayKey():"Шагайн морь уралдаан";
+  if(f)initFortune();else paint(["mori","mori","temee","khoni"],false);
+}
+$("tFort").onclick=()=>tab("fort");$("tRace").onclick=()=>tab("race");
+newRace();tab(location.hash==="#race"?"race":"fort");
+</script>
+
+<p style="text-align:center;font:13px system-ui;margin:8px 0 20px"><a href="index.html" style="color:inherit">← Бүх тоглоом</a></p>
+</body>
+</html>
